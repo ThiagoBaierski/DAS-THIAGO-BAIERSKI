@@ -1,5 +1,8 @@
 package br.com.sistemas.chamados.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import br.com.sistemas.chamados.enums.Perfil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -28,7 +32,8 @@ public class Tecnico {
     @Column(nullable = false, length = 10)
     private Perfil perfil;
 
-
+    @OneToMany(mappedBy = "tecnico")
+    private List<Chamado> chamados = new ArrayList<>();
 
     public Tecnico() {
     }
@@ -71,4 +76,11 @@ public class Tecnico {
         this.perfil = perfil;
     }
 
+    public List<Chamado> getChamados() {
+        return chamados;
+    }
+
+    public void setChamados(List<Chamado> chamados) {
+        this.chamados = chamados;
+    }
 }
