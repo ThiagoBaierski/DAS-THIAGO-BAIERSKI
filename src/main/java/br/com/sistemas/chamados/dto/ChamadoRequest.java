@@ -1,9 +1,6 @@
 package br.com.sistemas.chamados.dto;
 
-import java.time.LocalDateTime;
-
 import br.com.sistemas.chamados.enums.Prioridade;
-import br.com.sistemas.chamados.enums.StatusChamado;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,16 +15,8 @@ public record ChamadoRequest(
         @Size(max = 1000, message = "Descrição deve ter no máximo 1000 caracteres")
         String descricao,
 
-        LocalDateTime dataFechamento,
-
         @NotNull(message = "Prioridade é obrigatório")
         Prioridade prioridade,
-
-        @NotNull(message = "Prioridade é obrigatório")
-        StatusChamado status,
-
-        @NotNull(message = "Técnico é obrigatório")
-        Long tecnicoId,
 
         @NotNull(message = "Cliente é obrigatório")
         Long clienteId,

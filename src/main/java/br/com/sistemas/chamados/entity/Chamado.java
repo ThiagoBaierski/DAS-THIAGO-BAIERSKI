@@ -1,10 +1,20 @@
 package br.com.sistemas.chamados.entity;
 
+import java.time.LocalDateTime;
+
 import br.com.sistemas.chamados.enums.Prioridade;
 import br.com.sistemas.chamados.enums.StatusChamado;
-import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "chamados")
@@ -17,7 +27,7 @@ public class Chamado {
     @Column(nullable = false, length = 100)
     private String titulo;
 
-    @Column(nullable = false, length = 800)
+    @Column(nullable = false, length = 1000)
     private String descricao;
 
     @Column(nullable = false)
@@ -35,7 +45,7 @@ public class Chamado {
     private StatusChamado status = StatusChamado.ABERTO;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tecnico_id", nullable = false)
+    @JoinColumn(name = "tecnico_id", nullable = true)
     private Tecnico tecnico;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,15 +60,13 @@ public class Chamado {
     }
 
     public Chamado(String titulo, String descricao, Prioridade prioridade,
-                   Tecnico tecnico, Cliente cliente, Categoria categoria) {
+                   Cliente cliente, Categoria categoria) {
         this.titulo = titulo;
         this.descricao = descricao;
         this.prioridade = prioridade;
-        this.tecnico = tecnico;
         this.cliente = cliente;
         this.categoria = categoria;
     }
-
 
     public Long getId() {
         return id;

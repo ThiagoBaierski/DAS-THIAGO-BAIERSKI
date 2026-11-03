@@ -3,6 +3,7 @@ package br.com.sistemas.chamados.dto;
 import java.time.LocalDateTime;
 
 import br.com.sistemas.chamados.entity.Chamado;
+import br.com.sistemas.chamados.entity.Tecnico;
 import br.com.sistemas.chamados.enums.Prioridade;
 import br.com.sistemas.chamados.enums.StatusChamado;
 
@@ -23,11 +24,13 @@ public record ChamadoResponse(
 
 ) {
     public static ChamadoResponse de(Chamado c) {
+        Tecnico t = c.getTecnico();
+
         return new ChamadoResponse(
                 c.getId(), c.getTitulo(), c.getDescricao(),
                 c.getDataCriacao(), c.getDataFechamento(),
                 c.getPrioridade(), c.getStatus(),
-                c.getTecnico().getId(), c.getTecnico().getNome(),
+                t != null ? t.getId() : null, t != null ? t.getNome() : null,
                 c.getCliente().getId(), c.getCliente().getNome(),
                 c.getCategoria().getId(), c.getCategoria().getNome()
         );
