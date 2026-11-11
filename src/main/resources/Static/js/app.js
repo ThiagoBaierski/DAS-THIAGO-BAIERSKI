@@ -1,9 +1,8 @@
-
 const API_URL = '';
 
 const ENUMS = {
-  prioridade: ['BAIXA', 'MEDIA', 'ALTA', 'URGENTE'],
-  status: ['ABERTO', 'EM_ANDAMENTO', 'AGUARDANDO', 'FECHADO'],
+  prioridade: ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'],
+  status: ['ABERTO', 'EM_ANDAMENTO', 'AGUARDANDO_CLIENTE', 'FECHADO'],
   perfil: ['TECNICO', 'ADMIN'],
 };
 
@@ -44,7 +43,7 @@ function toast(msg, err = false) {
   setTimeout(() => el.remove(), 4000);
 }
 
-
+// executa ação, mostrando erro/sucesso
 async function run(fn, okMsg) {
   try { const r = await fn(); if (okMsg) toast(okMsg); return r; }
   catch (e) { toast(e.message, true); throw e; }
@@ -66,9 +65,12 @@ function confirmDialog(msg) {
     const m = openModal(`<h2>Confirmar</h2><p>${esc(msg)}</p>
       <div class="foot"><button class="btn" data-close>Cancelar</button>
       <button class="btn danger" id="ok">Confirmar</button></div>`);
-    $('#ok', m.el).onclick = () => { m.close(); resolve(true); };
-    m.el.addEventListener('mousedown', () => setTimeout(() => resolve(false), 0));
-    m.el.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => resolve(false)));
+    let done = false;
+    const finish = v => { if (done) return; done = true; m.close(); resolve(v); };
+    $('#ok', m.el).onclick = () => finish(true);
+    m.el.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => finish(false)));
+    // clicar fora da caixa (no fundo escuro) cancela
+    m.el.addEventListener('mousedown', e => { if (e.target === m.el) finish(false); });
   });
 }
 
@@ -120,9 +122,8 @@ const tecNome = c => pick(c, x => x.tecnicoNome, x => x.tecnico?.nome, x => x.te
 
 async function optionsFrom(path, labelFn) {
   const list = await api(path);
-  return list.map(x => ({ value: x.id, label: labelFn(x) }));
+  return list.map(x => ({ value: x.id, label: labelFn(x) || `#${x.id}` }));
 }
-
 
 const ENTITIES = {
   clientes: {
@@ -154,7 +155,7 @@ const ENTITIES = {
   comentarios: {
     title: 'Comentários', path: '/comentarios', singular: 'Comentário',
     columns: [['ID', x => x.id], ['Chamado', x => '#' + esc(pick(x, y => y.chamadoId, y => y.chamado?.id) ?? '—')],
-      ['Autor', x => esc(x.autor)], ['Texto', x => esc(x.texto)], ['Data', x => fmtData(x.data)]],
+      ['Autor', x => esc(x.autor)], ['Texto', x => esc(x.texto)], ['Data', x => fmtData(x.dataCriacao)]],
     fields: async (editing) => {
       const f = [
         { name: 'texto', label: 'Texto', type: 'textarea', max: 100 },
@@ -211,7 +212,6 @@ async function renderCrud(key) {
   load();
 }
 
-
 async function renderDashboard() {
   $('#title').textContent = 'Dashboard';
   $('#actions').innerHTML = '';
@@ -233,6 +233,7 @@ async function renderDashboard() {
   }
 }
 
+
 const chState = { page: 0, size: 10, status: '', prioridade: '', clienteId: '' };
 
 function chamadosTable(list, withActions = true) {
@@ -251,7 +252,7 @@ function chamadosTable(list, withActions = true) {
 
 async function chamadoFields() {
   const [clientes, categorias] = await Promise.all([
-    optionsFrom('/clientes', x => x.nome), optionsFrom('/categorias', x => x.nome)]);
+    optionsFrom('/clientes', x => x.nome), optionsFrom('/categorias', x => x.nome ?? x.descricao)]);
   return [
     { name: 'titulo', label: 'Título', max: 100 },
     { name: 'descricao', label: 'Descrição', type: 'textarea', max: 1000 },
@@ -311,14 +312,11 @@ async function renderChamados() {
   load();
 }
 
-
 async function verChamado(id, onChange) {
   let c, comentarios = [];
   try {
     c = await api(`/chamados/${id}`);
-    const todos = await api('/comentarios');
-    const temId = todos.some(x => pick(x, y => y.chamadoId, y => y.chamado?.id) != null);
-    comentarios = temId ? todos.filter(x => pick(x, y => y.chamadoId, y => y.chamado?.id) == id) : todos;
+    comentarios = c.comentarios || [];
   } catch (e) { return toast(e.message, true); }
 
   const fechado = c.status === 'FECHADO';
@@ -340,7 +338,7 @@ async function verChamado(id, onChange) {
       <button class="btn sm primary" id="a-fechar" ${fechado ? 'disabled' : ''}>Fechar chamado</button>
     </div>
     <h3 style="margin-top:20px">Comentários (${comentarios.length})</h3>
-    <div id="coms">${comentarios.map(x => `<div class="coment"><small>${esc(x.autor)} — ${fmtData(x.data)}</small>${esc(x.texto)}</div>`).join('') || '<div class="empty">Sem comentários.</div>'}</div>
+    <div id="coms">${comentarios.map(x => `<div class="coment"><small>${esc(x.autor)} — ${fmtData(x.dataCriacao)}</small>${esc(x.texto)}</div>`).join('') || '<div class="empty">Sem comentários.</div>'}</div>
     <form id="f-com"><label>Novo comentário</label>
       <input name="autor" placeholder="Seu nome" required maxlength="100" style="margin-bottom:6px">
       <input name="texto" placeholder="Comentário (máx. 100 caracteres)" required maxlength="100">
@@ -371,7 +369,6 @@ async function verChamado(id, onChange) {
       .then(refresh).catch(() => {});
   };
 }
-
 
 const VIEWS = {
   dashboard: renderDashboard,
