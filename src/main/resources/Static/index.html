@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sistema de Chamados</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="brand">Chamados</div>
+    <nav id="nav">
+      <a href="#dashboard" data-view="dashboard">Dashboard</a>
+      <a href="#chamados" data-view="chamados">Chamados</a>
+      <a href="#clientes" data-view="clientes">Clientes</a>
+      <a href="#tecnicos" data-view="tecnicos">Técnicos</a>
+      <a href="#categorias" data-view="categorias">Categorias</a>
+      <a href="#comentarios" data-view="comentarios">Comentários</a>
+    </nav>
+  </header>
+
+  <main>
+    <header class="topbar">
+      <h1 id="title"></h1>
+      <div id="actions"></div>
+    </header>
+    <section id="content"></section>
+  </main>
+
+  <div id="modal-root"></div>
+  <div id="toasts"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

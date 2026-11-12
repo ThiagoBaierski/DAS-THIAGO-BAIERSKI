@@ -5,8 +5,7 @@ import br.com.sistemas.chamados.entity.Categoria;
 public record CategoriaResponse(
         Long id,
         String nome,
-        String descricao,
-        
+        String descricao
 )
 
 {
